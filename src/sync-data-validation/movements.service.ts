@@ -25,7 +25,7 @@ export class MovementsService {
       );
       const movementsBalancePeriod =
         this.getTotalMovementsAmount(movementsPeriod);
-      const result = this.checkDataIntegrity(movementsBalancePeriod, balance);
+      const result = this.validateBalance(movementsBalancePeriod, balance);
       results.push(result);
     });
 
@@ -72,7 +72,7 @@ export class MovementsService {
     return totalAmount;
   }
 
-  private checkDataIntegrity(computedAmount: number, balance: BalanceDTO) {
+  private validateBalance(computedAmount: number, balance: BalanceDTO) {
     const balanceDate = new Date(balance.date);
     if (computedAmount === balance.balance) {
       return new SuccededSyncDataValidationResponse('Accepted');
@@ -96,10 +96,9 @@ export class MovementsService {
   }
 
   private hasAnomaly(results: AbstractResponse[]) {
-    const anomalies = results.filter(
+    return results.some(
       (result) => result instanceof FailedSyncDataValidationResponse,
     );
-    return anomalies.length > 0;
   }
 
   private getAnomaliesReason(results: AbstractResponse[]) {
@@ -107,7 +106,7 @@ export class MovementsService {
     const anomalies = results.filter(
       (result) => result instanceof FailedSyncDataValidationResponse,
     );
-    anomalies.map((anomaly: FailedSyncDataValidationResponse) =>
+    anomalies.forEach((anomaly: FailedSyncDataValidationResponse) =>
       reasons.push(...anomaly.getReasons()),
     );
     return reasons;
