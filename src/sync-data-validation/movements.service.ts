@@ -73,14 +73,14 @@ export class MovementsService {
   }
 
   private validateBalance(computedAmount: number, balance: BalanceDTO) {
-    const balanceDate = new Date(balance.date);
+    const balanceDate = this.getMonthAndYearFromDate(new Date(balance.date));
     if (computedAmount === balance.balance) {
       return new SuccededSyncDataValidationResponse('Accepted');
     }
     const reason = new ReasonDTO();
-    const period = `${(balanceDate.getMonth() + 1)
-      .toString()
-      .padStart(2, '0')}-${balanceDate.getFullYear()}`;
+    const period = `${(balanceDate.month + 1).toString().padStart(2, '0')}-${
+      balanceDate.year
+    }`;
     if (computedAmount > balance.balance) {
       reason.summary = 'Duplicates or Additional Data Noticed.';
       reason.details = `The total monthly transaction amount for the [${period}] period is greater than the checkpoint balance.`;
@@ -110,5 +110,12 @@ export class MovementsService {
       reasons.push(...anomaly.getReasons()),
     );
     return reasons;
+  }
+
+  private getMonthAndYearFromDate(date: Date) {
+    return {
+      month: date.getMonth(),
+      year: date.getFullYear(),
+    };
   }
 }
