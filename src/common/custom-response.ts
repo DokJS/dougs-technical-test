@@ -1,40 +1,24 @@
-import { ReasonDTO } from 'src/sync-data-validation/dtos/reason.dto';
+import { ReasonDTO } from '../sync-data-validation/dtos/reason.dto';
 
 export abstract class AbstractResponse {
-  protected _message: string;
-
-  constructor(message: string) {
-    this._message = message;
-  }
-
-  get message() {
-    return this._message;
-  }
-
-  set message(value: string) {
-    this._message = value;
-  }
+  constructor(protected message: string) {}
 }
 
 export class SuccededSyncDataValidationResponse extends AbstractResponse {
-  constructor(message: string) {
+  constructor(protected message: string) {
     super(message);
   }
 }
 
 export class FailedSyncDataValidationResponse extends AbstractResponse {
-  private _reasons: ReasonDTO[];
-
-  constructor(message: string, reasons: ReasonDTO[]) {
+  constructor(
+    protected message: string,
+    private reasons: ReasonDTO[],
+  ) {
     super(message);
-    this._reasons = [...reasons];
   }
 
-  get reasons() {
-    return this._reasons;
-  }
-
-  set reasons(value: ReasonDTO[]) {
-    this._reasons = [...value];
+  getReasons() {
+    return this.reasons;
   }
 }

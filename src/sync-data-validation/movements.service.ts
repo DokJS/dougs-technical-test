@@ -42,15 +42,15 @@ export class MovementsService {
 
   private getMovementsByPeriod(period: Date, movements: MovementDTO[]) {
     let filteredMovements: MovementDTO[] = [];
-    const periodMonth = period.getMonth();
-    const periodYear = period.getFullYear();
+    const periodMonth = new Date(period).getMonth();
+    const periodYear = new Date(period).getFullYear();
 
     if (movements.length) {
       filteredMovements = [
         ...movements.filter(
           (movement: MovementDTO) =>
-            movement.date.getMonth() === periodMonth &&
-            movement.date.getFullYear() == periodYear,
+            new Date(movement.date).getMonth() === periodMonth &&
+            new Date(movement.date).getFullYear() == periodYear,
         ),
       ];
     }
@@ -73,13 +73,14 @@ export class MovementsService {
   }
 
   private checkDataIntegrity(computedAmount: number, balance: BalanceDTO) {
+    const balanceDate = new Date(balance.date);
     if (computedAmount === balance.balance) {
       return new SuccededSyncDataValidationResponse('Accepted');
     }
     const reason = new ReasonDTO();
-    const period = `${(balance.date.getMonth() + 1)
+    const period = `${(balanceDate.getMonth() + 1)
       .toString()
-      .padStart(2, '0')}-${balance.date.getFullYear()}`;
+      .padStart(2, '0')}-${balanceDate.getFullYear()}`;
     if (computedAmount > balance.balance) {
       reason.summary = 'Duplicates or Additional Data Noticed.';
       reason.details = `The total monthly transaction amount for the [${period}] period is greater than the checkpoint balance.`;
@@ -107,7 +108,7 @@ export class MovementsService {
       (result) => result instanceof FailedSyncDataValidationResponse,
     );
     anomalies.map((anomaly: FailedSyncDataValidationResponse) =>
-      reasons.push(...anomaly.reasons),
+      reasons.push(...anomaly.getReasons()),
     );
     return reasons;
   }
